@@ -1,16 +1,36 @@
-// frontend/src/App.tsx (React example)
-import { useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout/Layout';
+import MailAccountsPage from './pages/MailAccountsPage';
+import AutomationFlowsPage from './pages/AutomationFlowsPage';
+import OAuthCallbackPage from './pages/OAuthCallbackPage';
 
 function App() {
-  const [message, setMessage] = useState("");
+  return (
+    <Router>
+      <Routes>
+        {/* OAuth callback without Layout wrapper */}
+        <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
 
-  useEffect(() => {
-    fetch("/api/hello")
-      .then((res) => res.json())
-      .then((data) => setMessage(data.message));
-  }, []);
-
-  return <div className="bg-amber-400">{message || "Loading..."}</div>;
+        {/* Main app routes with Layout */}
+        <Route
+          path="/"
+          element={
+            <Layout>
+              <MailAccountsPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/automation-flows"
+          element={
+            <Layout>
+              <AutomationFlowsPage />
+            </Layout>
+          }
+        />
+      </Routes>
+    </Router>
+  );
 }
 
 export default App;

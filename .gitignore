@@ -37,6 +37,11 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+backend/prisma/dev.db*
+backend/prisma/migrations/
 
 # Local config
 *.local
+
+# Reference files (no longer needed after implementation)
+fromOtherProject/
