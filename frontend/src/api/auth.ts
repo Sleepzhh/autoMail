@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
 export interface User {
   id: number;
@@ -17,36 +17,42 @@ export interface SetupStatus {
 export async function getSetupStatus(): Promise<SetupStatus> {
   const response = await fetch(`${API_BASE_URL}/auth/setup-status`);
   if (!response.ok) {
-    throw new Error('Failed to check setup status');
+    throw new Error("Failed to check setup status");
   }
   return response.json();
 }
 
-export async function register(username: string, password: string): Promise<AuthResponse> {
+export async function register(
+  username: string,
+  password: string
+): Promise<AuthResponse> {
   const response = await fetch(`${API_BASE_URL}/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
   });
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || 'Registration failed');
+    throw new Error(error.error || "Registration failed");
   }
 
   return response.json();
 }
 
-export async function login(username: string, password: string): Promise<AuthResponse> {
+export async function login(
+  username: string,
+  password: string
+): Promise<AuthResponse> {
   const response = await fetch(`${API_BASE_URL}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
   });
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || 'Login failed');
+    throw new Error(error.error || "Login failed");
   }
 
   return response.json();
@@ -58,7 +64,7 @@ export async function getCurrentUser(token: string): Promise<{ user: User }> {
   });
 
   if (!response.ok) {
-    throw new Error('Invalid token');
+    throw new Error("Invalid token");
   }
 
   return response.json();
