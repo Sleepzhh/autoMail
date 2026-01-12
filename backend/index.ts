@@ -1,12 +1,16 @@
+import dotenv from "dotenv";
+// Load environment variables BEFORE any other imports that might use them
+dotenv.config();
+
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import mailAccountsRouter from "./src/routes/mailAccounts";
 import automationFlowsRouter from "./src/routes/automationFlows";
-import oauthRouter from "./src/routes/oauth";
+import oauthRouter, { oauthPublicRouter } from "./src/routes/oauth";
+import migrationRouter from "./src/routes/migration";
+import authRouter from "./src/routes/auth";
+import { requireAuth } from "./src/middleware/auth";
 import { startScheduler } from "./src/services/automation";
-
-dotenv.config();
 
 const app = express();
 app.use(cors());
@@ -14,14 +18,15 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 4000;
 
-// Routes
-app.get("/api/hello", (req, res) => {
-  res.json({ message: "Hello from autoMail backend!" });
-});
+// Public routes (no auth required)
+app.use("/api/auth", authRouter);
+app.use("/api/oauth", oauthPublicRouter); // OAuth callback (called by provider)
 
-app.use("/api/mail-accounts", mailAccountsRouter);
-app.use("/api/automation-flows", automationFlowsRouter);
-app.use("/api/oauth", oauthRouter);
+// Protected routes (auth required)
+app.use("/api/mail-accounts", requireAuth, mailAccountsRouter);
+app.use("/api/automation-flows", requireAuth, automationFlowsRouter);
+app.use("/api/oauth", requireAuth, oauthRouter);
+app.use("/api/migration", requireAuth, migrationRouter);
 
 // Start server
 app.listen(PORT, () => {

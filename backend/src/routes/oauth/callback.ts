@@ -1,5 +1,5 @@
 import { Request, Response, RequestHandler } from "express";
-import prisma from "../../utils/prisma";
+import db from "../../utils/db";
 import { HTTP_STATUS } from "../../constants";
 import { encryptPassword } from "../../utils/crypto";
 import { exchangeCodeForTokens, getUserInfo } from "../../services/tokenManager";
@@ -42,7 +42,7 @@ export const callbackHandler = (async (req: Request, res: Response) => {
       .json({ error: "Missing authorization code or state" });
   }
 
-  // Verify JWT state token
+  // Verify JWT state token for CSRF protection
   const stateData = verifyStateToken(state);
   if (!stateData) {
     return res
@@ -97,22 +97,27 @@ export const callbackHandler = (async (req: Request, res: Response) => {
     }
 
     // Create mail account
-    const mailAccount = await prisma.mailAccount.create({
-      data: {
-        name: userName || userEmail,
-        type: "microsoft",
-        email: userEmail,
-        imapHost: providerConfig.imap.host,
-        imapPort: providerConfig.imap.port,
-        accessToken: encryptPassword(tokens.accessToken),
-        refreshToken: encryptPassword(tokens.refreshToken),
-        tokenExpiry: tokens.expiresAt,
-      },
-    });
+    const now = new Date().toISOString();
+    const stmt = db.prepare(`
+      INSERT INTO mail_accounts (name, type, email, imapHost, imapPort, accessToken, refreshToken, tokenExpiry, createdAt, updatedAt)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    const result = stmt.run(
+      userName || userEmail,
+      "microsoft",
+      userEmail,
+      providerConfig.imap.host,
+      providerConfig.imap.port,
+      encryptPassword(tokens.accessToken),
+      encryptPassword(tokens.refreshToken),
+      tokens.expiresAt.toISOString(),
+      now,
+      now
+    );
 
     // Redirect to frontend with success
     res.redirect(
-      `${frontendUrl}/oauth/callback?success=true&provider=${provider}&accountId=${mailAccount.id}`
+      `${frontendUrl}/oauth/callback?success=true&provider=${provider}&accountId=${result.lastInsertRowid}`
     );
   } catch (error) {
     console.error("Error in OAuth callback:", error);

@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import prisma from '../utils/prisma';
+import db, { MailAccount } from '../utils/db';
 import { HTTP_STATUS, ERROR_MESSAGES } from '../constants';
 import { encryptPassword, decryptPassword } from '../utils/crypto';
 
@@ -8,9 +8,7 @@ const router = Router();
 // Get all mail accounts
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const accounts = await prisma.mailAccount.findMany({
-      orderBy: { createdAt: 'desc' },
-    });
+    const accounts = db.prepare('SELECT * FROM mail_accounts ORDER BY createdAt DESC').all() as MailAccount[];
 
     // Decrypt passwords for IMAP accounts
     const accountsWithDecryptedPasswords = accounts.map((account) => {
@@ -34,9 +32,7 @@ router.get('/', async (req: Request, res: Response) => {
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const account = await prisma.mailAccount.findUnique({
-      where: { id },
-    });
+    const account = db.prepare('SELECT * FROM mail_accounts WHERE id = ?').get(id) as MailAccount | undefined;
 
     if (!account) {
       return res.status(HTTP_STATUS.NOT_FOUND).json({ error: ERROR_MESSAGES.ACCOUNT_NOT_FOUND });
@@ -72,28 +68,36 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: 'Microsoft accounts require tokens' });
     }
 
-    // Encrypt password for IMAP accounts
-    const accountData: any = {
-      name,
-      type,
-      email,
-    };
+    const now = new Date().toISOString();
 
     if (type === 'imap') {
-      accountData.imapHost = imapHost;
-      accountData.imapPort = imapPort;
-      accountData.password = encryptPassword(password);
+      const stmt = db.prepare(`
+        INSERT INTO mail_accounts (name, type, email, imapHost, imapPort, password, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      const result = stmt.run(name, type, email, imapHost, imapPort, encryptPassword(password), now, now);
+
+      const account = db.prepare('SELECT * FROM mail_accounts WHERE id = ?').get(result.lastInsertRowid) as MailAccount;
+      res.status(HTTP_STATUS.CREATED).json(account);
     } else if (type === 'microsoft') {
-      accountData.accessToken = accessToken;
-      accountData.refreshToken = refreshToken;
-      accountData.tokenExpiry = tokenExpiry ? new Date(tokenExpiry) : null;
+      const stmt = db.prepare(`
+        INSERT INTO mail_accounts (name, type, email, accessToken, refreshToken, tokenExpiry, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      const result = stmt.run(
+        name,
+        type,
+        email,
+        accessToken,
+        refreshToken,
+        tokenExpiry ? new Date(tokenExpiry).toISOString() : null,
+        now,
+        now
+      );
+
+      const account = db.prepare('SELECT * FROM mail_accounts WHERE id = ?').get(result.lastInsertRowid) as MailAccount;
+      res.status(HTTP_STATUS.CREATED).json(account);
     }
-
-    const account = await prisma.mailAccount.create({
-      data: accountData,
-    });
-
-    res.status(HTTP_STATUS.CREATED).json(account);
   } catch (error) {
     console.error('Error creating mail account:', error);
     res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ error: 'Failed to create account' });
@@ -106,42 +110,50 @@ router.put('/:id', async (req: Request, res: Response) => {
     const id = parseInt(req.params.id as string);
     const { name, type, email, imapHost, imapPort, password, accessToken, refreshToken, tokenExpiry } = req.body;
 
-    const existing = await prisma.mailAccount.findUnique({ where: { id } });
+    const existing = db.prepare('SELECT * FROM mail_accounts WHERE id = ?').get(id) as MailAccount | undefined;
     if (!existing) {
       return res.status(HTTP_STATUS.NOT_FOUND).json({ error: ERROR_MESSAGES.ACCOUNT_NOT_FOUND });
     }
 
-    const updateData: any = {
-      name,
-      type,
-      email,
-    };
+    const now = new Date().toISOString();
 
     if (type === 'imap') {
-      updateData.imapHost = imapHost;
-      updateData.imapPort = imapPort;
-      if (password) {
-        updateData.password = encryptPassword(password);
-      }
-      // Clear OAuth fields
-      updateData.accessToken = null;
-      updateData.refreshToken = null;
-      updateData.tokenExpiry = null;
+      const stmt = db.prepare(`
+        UPDATE mail_accounts
+        SET name = ?, type = ?, email = ?, imapHost = ?, imapPort = ?, password = ?,
+            accessToken = NULL, refreshToken = NULL, tokenExpiry = NULL, updatedAt = ?
+        WHERE id = ?
+      `);
+      stmt.run(
+        name,
+        type,
+        email,
+        imapHost,
+        imapPort,
+        password ? encryptPassword(password) : existing.password,
+        now,
+        id
+      );
     } else if (type === 'microsoft') {
-      updateData.accessToken = accessToken;
-      updateData.refreshToken = refreshToken;
-      updateData.tokenExpiry = tokenExpiry ? new Date(tokenExpiry) : null;
-      // Clear IMAP fields
-      updateData.imapHost = null;
-      updateData.imapPort = null;
-      updateData.password = null;
+      const stmt = db.prepare(`
+        UPDATE mail_accounts
+        SET name = ?, type = ?, email = ?, accessToken = ?, refreshToken = ?, tokenExpiry = ?,
+            imapHost = NULL, imapPort = NULL, password = NULL, updatedAt = ?
+        WHERE id = ?
+      `);
+      stmt.run(
+        name,
+        type,
+        email,
+        accessToken,
+        refreshToken,
+        tokenExpiry ? new Date(tokenExpiry).toISOString() : null,
+        now,
+        id
+      );
     }
 
-    const account = await prisma.mailAccount.update({
-      where: { id },
-      data: updateData,
-    });
-
+    const account = db.prepare('SELECT * FROM mail_accounts WHERE id = ?').get(id) as MailAccount;
     res.status(HTTP_STATUS.OK).json(account);
   } catch (error) {
     console.error('Error updating mail account:', error);
@@ -154,14 +166,12 @@ router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
 
-    const existing = await prisma.mailAccount.findUnique({ where: { id } });
+    const existing = db.prepare('SELECT * FROM mail_accounts WHERE id = ?').get(id) as MailAccount | undefined;
     if (!existing) {
       return res.status(HTTP_STATUS.NOT_FOUND).json({ error: ERROR_MESSAGES.ACCOUNT_NOT_FOUND });
     }
 
-    await prisma.mailAccount.delete({
-      where: { id },
-    });
+    db.prepare('DELETE FROM mail_accounts WHERE id = ?').run(id);
 
     res.status(HTTP_STATUS.OK).json({ message: 'Account deleted successfully' });
   } catch (error) {
@@ -174,7 +184,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
 router.get('/:id/mailboxes', async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const account = await prisma.mailAccount.findUnique({ where: { id } });
+    const account = db.prepare('SELECT * FROM mail_accounts WHERE id = ?').get(id) as MailAccount | undefined;
 
     if (!account) {
       return res.status(HTTP_STATUS.NOT_FOUND).json({ error: ERROR_MESSAGES.ACCOUNT_NOT_FOUND });

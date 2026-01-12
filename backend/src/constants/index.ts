@@ -12,4 +12,5 @@ export const ERROR_MESSAGES = {
   FLOW_NOT_FOUND: 'Automation flow not found',
   FAILED_TO_MOVE_MESSAGE: 'Failed to move message',
   INVALID_CREDENTIALS: 'Invalid credentials',
+  INTERNAL_SERVER_ERROR: 'Internal server error',
 };

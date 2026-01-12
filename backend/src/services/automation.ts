@@ -1,13 +1,7 @@
-import prisma from '../utils/prisma';
+import db, { AutomationFlow, MailAccount, FlowWithAccounts } from '../utils/db';
 import { withImapClient } from '../utils/imapClient';
 import { decryptPassword } from '../utils/crypto';
 import { getValidAccessToken } from './tokenManager';
-import { AutomationFlow, MailAccount } from '@prisma/client';
-
-interface FlowWithAccounts extends AutomationFlow {
-  sourceMailAccount: MailAccount;
-  targetMailAccount: MailAccount;
-}
 
 // Helper: Resolve mailbox path, handling special-use identifiers (e.g., \Trash, \Sent)
 async function resolveMailboxPath(client: any, mailboxPath: string): Promise<string | null> {
@@ -169,12 +163,13 @@ export async function runAutomationFlow(flow: FlowWithAccounts): Promise<void> {
   console.log(`Running automation flow: ${flow.name} (ID: ${flow.id})`);
 
   // Create execution record
-  const execution = await prisma.automationExecution.create({
-    data: {
-      flowId: flow.id,
-      status: 'running',
-    },
-  });
+  const now = new Date().toISOString();
+  const execStmt = db.prepare(`
+    INSERT INTO automation_executions (flowId, status, startedAt)
+    VALUES (?, ?, ?)
+  `);
+  const execResult = execStmt.run(flow.id, 'running', now);
+  const executionId = execResult.lastInsertRowid as number;
 
   try {
     const sourceCredentials = await getImapCredentials(flow.sourceMailAccount);
@@ -197,22 +192,14 @@ export async function runAutomationFlow(flow: FlowWithAccounts): Promise<void> {
     if (!messageUids || messageUids.length === 0) {
       console.log(`No messages to move in flow: ${flow.name}`);
 
-      await prisma.automationExecution.update({
-        where: { id: execution.id },
-        data: {
-          status: 'success',
-          movedCount: 0,
-          completedAt: new Date(),
-        },
-      });
+      const completedAt = new Date().toISOString();
+      db.prepare(`
+        UPDATE automation_executions SET status = ?, movedCount = ?, completedAt = ? WHERE id = ?
+      `).run('success', 0, completedAt, executionId);
 
-      await prisma.automationFlow.update({
-        where: { id: flow.id },
-        data: {
-          lastRun: new Date(),
-          nextRun: new Date(Date.now() + flow.intervalMinutes * 60000),
-        },
-      });
+      db.prepare(`
+        UPDATE automation_flows SET lastRun = ?, nextRun = ?, updatedAt = ? WHERE id = ?
+      `).run(completedAt, new Date(Date.now() + flow.intervalMinutes * 60000).toISOString(), completedAt, flow.id);
 
       return;
     }
@@ -241,35 +228,24 @@ export async function runAutomationFlow(flow: FlowWithAccounts): Promise<void> {
     console.log(`Moved ${result.successCount} messages in flow: ${flow.name}`);
 
     // Update execution record
-    await prisma.automationExecution.update({
-      where: { id: execution.id },
-      data: {
-        status: 'success',
-        movedCount: result.successCount,
-        completedAt: new Date(),
-      },
-    });
+    const completedAt = new Date().toISOString();
+    db.prepare(`
+      UPDATE automation_executions SET status = ?, movedCount = ?, completedAt = ? WHERE id = ?
+    `).run('success', result.successCount, completedAt, executionId);
 
     // Update flow last run and next run
-    await prisma.automationFlow.update({
-      where: { id: flow.id },
-      data: {
-        lastRun: new Date(),
-        nextRun: new Date(Date.now() + flow.intervalMinutes * 60000),
-      },
-    });
+    db.prepare(`
+      UPDATE automation_flows SET lastRun = ?, nextRun = ?, updatedAt = ? WHERE id = ?
+    `).run(completedAt, new Date(Date.now() + flow.intervalMinutes * 60000).toISOString(), completedAt, flow.id);
+
   } catch (error: any) {
     console.error(`Error running automation flow ${flow.name}:`, error);
 
     // Update execution record with error
-    await prisma.automationExecution.update({
-      where: { id: execution.id },
-      data: {
-        status: 'error',
-        errorMessage: error.message || 'Unknown error',
-        completedAt: new Date(),
-      },
-    });
+    const completedAt = new Date().toISOString();
+    db.prepare(`
+      UPDATE automation_executions SET status = ?, errorMessage = ?, completedAt = ? WHERE id = ?
+    `).run('error', error.message || 'Unknown error', completedAt, executionId);
 
     throw error;
   }
@@ -280,28 +256,25 @@ export async function runScheduler(): Promise<void> {
   console.log('Running automation scheduler...');
 
   try {
-    const now = new Date();
+    const now = new Date().toISOString();
 
     // Find all enabled flows that are due to run
-    const flows = await prisma.automationFlow.findMany({
-      where: {
-        enabled: true,
-        OR: [
-          { nextRun: null },
-          { nextRun: { lte: now } },
-        ],
-      },
-      include: {
-        sourceMailAccount: true,
-        targetMailAccount: true,
-      },
-    });
+    const flows = db.prepare(`
+      SELECT * FROM automation_flows
+      WHERE enabled = 1 AND (nextRun IS NULL OR nextRun <= ?)
+    `).all(now) as AutomationFlow[];
 
     console.log(`Found ${flows.length} flows to run`);
 
     for (const flow of flows) {
       try {
-        await runAutomationFlow(flow);
+        // Get accounts for this flow
+        const sourceMailAccount = db.prepare('SELECT * FROM mail_accounts WHERE id = ?').get(flow.sourceMailAccountId) as MailAccount;
+        const targetMailAccount = db.prepare('SELECT * FROM mail_accounts WHERE id = ?').get(flow.targetMailAccountId) as MailAccount;
+
+        if (sourceMailAccount && targetMailAccount) {
+          await runAutomationFlow({ ...flow, sourceMailAccount, targetMailAccount });
+        }
       } catch (error) {
         console.error(`Failed to run flow ${flow.name}:`, error);
         // Continue with other flows

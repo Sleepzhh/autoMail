@@ -1,5 +1,5 @@
 import { Request, Response, RequestHandler } from "express";
-import prisma from "../../utils/prisma";
+import db, { MailAccount } from "../../utils/db";
 import { HTTP_STATUS } from "../../constants";
 import { isTokenExpired } from "../../services/tokenManager";
 
@@ -18,15 +18,7 @@ export const statusHandler = (async (req: Request, res: Response) => {
   }
 
   try {
-    const mailAccount = await prisma.mailAccount.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        type: true,
-        email: true,
-        tokenExpiry: true,
-      },
-    });
+    const mailAccount = db.prepare('SELECT id, type, email, tokenExpiry FROM mail_accounts WHERE id = ?').get(id) as Pick<MailAccount, 'id' | 'type' | 'email' | 'tokenExpiry'> | undefined;
 
     if (!mailAccount) {
       return res

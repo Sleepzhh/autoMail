@@ -13,9 +13,6 @@ router.get("/providers", listProvidersHandler);
 // Initiate OAuth authorization flow
 router.get("/:provider/authorize", authorizeHandler);
 
-// Handle OAuth callback
-router.get("/:provider/callback", callbackHandler);
-
 // Manually refresh access token
 router.post("/:provider/refresh/:mailAccountId", refreshHandler);
 
@@ -23,3 +20,7 @@ router.post("/:provider/refresh/:mailAccountId", refreshHandler);
 router.get("/status/:mailAccountId", statusHandler);
 
 export default router;
+
+// Public router for OAuth callback (called by OAuth provider, not frontend)
+export const oauthPublicRouter = Router();
+oauthPublicRouter.get("/:provider/callback", callbackHandler);
