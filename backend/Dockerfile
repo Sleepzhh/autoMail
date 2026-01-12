@@ -1,21 +1,20 @@
 FROM node:20-alpine
 
+# Install build dependencies for better-sqlite3 native module
+RUN apk add --no-cache python3 make g++
+
 WORKDIR /app
 
-# Install dependencies
+# Install dependencies (including dev for ts-node)
 COPY package*.json ./
 RUN npm ci
 
-# Copy source and prisma schema
+# Copy source
 COPY . .
-
-# Generate Prisma client
-RUN npx prisma generate
 
 # Create data directory for SQLite
 RUN mkdir -p /app/data
 
 EXPOSE 4000
 
-# Run migrations and start server
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+CMD ["npm", "start"]
