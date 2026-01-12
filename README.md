@@ -19,8 +19,6 @@ Email automation tool for moving emails between accounts automatically.
 services:
   backend:
     image: ghcr.io/sleepzhh/automail/backend:latest
-    ports:
-      - "4000:4000"
     environment:
       - NODE_ENV=production
       - PORT=4000
@@ -32,18 +30,28 @@ services:
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
     volumes:
       - automail-data:/app/data
+    networks:
+      - automail-network
     restart: unless-stopped
 
   frontend:
     image: ghcr.io/sleepzhh/automail/frontend:latest
     ports:
       - "80:80"
+    environment:
+      - BACKEND_URL=http://backend:4000
     depends_on:
       - backend
+    networks:
+      - automail-network
     restart: unless-stopped
 
 volumes:
   automail-data:
+
+networks:
+  automail-network:
+    driver: bridge
 ```
 
 2. Create a `.env` file with your secrets:
