@@ -118,16 +118,16 @@ export default function AutomationFlowsPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Automation Flows</h1>
-        {!showForm && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-            disabled={accounts.length === 0}
-          >
-            Add Flow
-          </button>
-        )}
+        <h1 className="text-2xl font-bold text-neutral-900">
+          Automation Flows
+        </h1>
+        <button
+          onClick={() => setShowForm(true)}
+          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+          disabled={accounts.length === 0}
+        >
+          Add Flow
+        </button>
       </div>
 
       {accounts.length === 0 && (
@@ -151,18 +151,17 @@ export default function AutomationFlowsPage() {
         </div>
       )}
 
-      {showForm && (
-        <AutomationFlowForm
-          flow={editingFlow}
-          accounts={accounts}
-          onSubmit={editingFlow ? handleUpdate : handleCreate}
-          onCancel={handleCancelForm}
-        />
-      )}
+      <AutomationFlowForm
+        open={showForm}
+        flow={editingFlow}
+        accounts={accounts}
+        onSubmit={editingFlow ? handleUpdate : handleCreate}
+        onCancel={handleCancelForm}
+      />
 
       {loading ? (
         <div className="text-center py-12">
-          <p className="text-gray-500">Loading automation flows...</p>
+          <p className="text-neutral-500">Loading automation flows...</p>
         </div>
       ) : (
         <AutomationFlowList

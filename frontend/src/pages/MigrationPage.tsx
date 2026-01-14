@@ -8,11 +8,14 @@ import {
   type MigrationResult,
 } from "../api/migration";
 import MigrationForm from "../components/Migration/MigrationForm";
+import { Alert } from "../components/ui";
 
 export default function MigrationPage() {
   const [accounts, setAccounts] = useState<MailAccount[]>([]);
   const [loading, setLoading] = useState(true);
-  const [defaultExcludedFolders, setDefaultExcludedFolders] = useState<string[]>([]);
+  const [defaultExcludedFolders, setDefaultExcludedFolders] = useState<
+    string[]
+  >([]);
   const [preview, setPreview] = useState<MigrationPreview | null>(null);
   const [result, setResult] = useState<MigrationResult | null>(null);
   const [isExecuting, setIsExecuting] = useState(false);
@@ -104,36 +107,24 @@ export default function MigrationPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Migration</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-neutral-900">Migration</h1>
+          <p className="mt-1 text-sm text-neutral-500">
             Copy folders and messages from one account to another
           </p>
         </div>
       </div>
 
       {accounts.length < 2 && (
-        <div className="rounded-md bg-yellow-50 p-4">
-          <p className="text-sm text-yellow-800">
-            You need at least two mail accounts to perform a migration.
-          </p>
-        </div>
+        <Alert variant="warning">
+          You need at least two mail accounts to perform a migration.
+        </Alert>
       )}
 
-      {message && (
-        <div
-          className={`rounded-md p-4 ${
-            message.type === "success"
-              ? "bg-green-50 text-green-800"
-              : "bg-red-50 text-red-800"
-          }`}
-        >
-          <p className="text-sm">{message.text}</p>
-        </div>
-      )}
+      {message && <Alert variant={message.type}>{message.text}</Alert>}
 
       {loading ? (
         <div className="text-center py-12">
-          <p className="text-gray-500">Loading...</p>
+          <p className="text-neutral-500">Loading...</p>
         </div>
       ) : (
         <>
@@ -148,56 +139,58 @@ export default function MigrationPage() {
           />
 
           {preview && !result && (
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">
+            <div className="bg-white border border-neutral-200 rounded-lg shadow-sm">
+              <div className="px-6 py-4 border-b border-neutral-200">
+                <h2 className="text-lg font-semibold text-neutral-900">
                   Migration Preview
                 </h2>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-neutral-500">
                   The following folders and messages will be copied
                 </p>
               </div>
-              <div className="px-6 py-4">
-                <div className="mb-4">
-                  <span className="text-sm font-medium text-gray-700">
-                    Total Messages:{" "}
+              <div className="px-6 py-4 space-y-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-neutral-700">
+                    Total Messages:
                   </span>
-                  <span className="text-sm text-gray-900">
+                  <span className="text-sm text-neutral-900">
                     {preview.totalMessages}
                   </span>
                 </div>
-                <div className="mb-4">
-                  <span className="text-sm font-medium text-gray-700">
-                    Excluded Folders:{" "}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-neutral-700">
+                    Excluded Folders:
                   </span>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-neutral-500">
                     {preview.excludedFolders.join(", ") || "None"}
                   </span>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">
+                  <h3 className="text-sm font-medium text-neutral-700 mb-2">
                     Folders to Copy:
                   </h3>
                   {preview.folders.length === 0 ? (
-                    <p className="text-sm text-gray-500">No folders to copy</p>
+                    <p className="text-sm text-neutral-500">
+                      No folders to copy
+                    </p>
                   ) : (
-                    <ul className="divide-y divide-gray-200 border rounded-md">
+                    <ul className="divide-y divide-neutral-200 border border-neutral-200 rounded-md">
                       {preview.folders.map((folder) => (
                         <li
                           key={folder.path}
                           className="px-4 py-3 flex justify-between items-center"
                         >
                           <div>
-                            <span className="text-sm text-gray-900">
+                            <span className="text-sm text-neutral-900">
                               {folder.path}
                             </span>
                             {folder.specialUse && (
-                              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
+                              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-neutral-100 text-neutral-600">
                                 {folder.specialUse}
                               </span>
                             )}
                           </div>
-                          <span className="text-sm text-gray-500">
+                          <span className="text-sm text-neutral-500">
                             {folder.messageCount} messages
                           </span>
                         </li>
@@ -210,16 +203,22 @@ export default function MigrationPage() {
           )}
 
           {result && (
-            <div className="bg-white shadow rounded-lg overflow-hidden">
+            <div
+              className={`border rounded-lg shadow-sm overflow-hidden ${
+                result.success
+                  ? "border-green-200"
+                  : "border-red-200"
+              }`}
+            >
               <div
-                className={`px-6 py-4 border-b ${
+                className={`px-6 py-4 ${
                   result.success
-                    ? "bg-green-50 border-green-200"
-                    : "bg-red-50 border-red-200"
+                    ? "bg-green-50 border-b border-green-200"
+                    : "bg-red-50 border-b border-red-200"
                 }`}
               >
                 <h2
-                  className={`text-lg font-medium ${
+                  className={`text-lg font-semibold ${
                     result.success ? "text-green-800" : "text-red-800"
                   }`}
                 >
@@ -228,22 +227,22 @@ export default function MigrationPage() {
                     : "Migration Completed with Errors"}
                 </h2>
               </div>
-              <div className="px-6 py-4 space-y-4">
-                <div>
-                  <span className="text-sm font-medium text-gray-700">
-                    Total Messages Copied:{" "}
+              <div className="px-6 py-4 space-y-4 bg-white">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-neutral-700">
+                    Total Messages Copied:
                   </span>
-                  <span className="text-sm text-gray-900">
+                  <span className="text-sm text-neutral-900">
                     {result.totalMessagesCopied}
                   </span>
                 </div>
 
                 {result.foldersCreated.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    <h3 className="text-sm font-medium text-neutral-700 mb-2">
                       Folders Created:
                     </h3>
-                    <ul className="list-disc list-inside text-sm text-gray-600">
+                    <ul className="list-disc list-inside text-sm text-neutral-600">
                       {result.foldersCreated.map((folder) => (
                         <li key={folder}>{folder}</li>
                       ))}
@@ -253,19 +252,19 @@ export default function MigrationPage() {
 
                 {result.foldersCopied.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    <h3 className="text-sm font-medium text-neutral-700 mb-2">
                       Folders Copied:
                     </h3>
-                    <ul className="divide-y divide-gray-200 border rounded-md">
+                    <ul className="divide-y divide-neutral-200 border border-neutral-200 rounded-md">
                       {result.foldersCopied.map((folder) => (
                         <li
                           key={folder.path}
                           className="px-4 py-2 flex justify-between items-center"
                         >
-                          <span className="text-sm text-gray-900">
+                          <span className="text-sm text-neutral-900">
                             {folder.path}
                           </span>
-                          <span className="text-sm text-gray-500">
+                          <span className="text-sm text-neutral-500">
                             {folder.messageCount} messages
                           </span>
                         </li>

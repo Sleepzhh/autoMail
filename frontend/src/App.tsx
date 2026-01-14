@@ -1,20 +1,25 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import Layout from './components/Layout/Layout';
-import MailAccountsPage from './pages/MailAccountsPage';
-import AutomationFlowsPage from './pages/AutomationFlowsPage';
-import MigrationPage from './pages/MigrationPage';
-import OAuthCallbackPage from './pages/OAuthCallbackPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import Layout from "./components/Layout/Layout";
+import MailAccountsPage from "./pages/MailAccountsPage";
+import AutomationFlowsPage from "./pages/AutomationFlowsPage";
+import MigrationPage from "./pages/MigrationPage";
+import OAuthCallbackPage from "./pages/OAuthCallbackPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading, needsSetup } = useAuth();
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p className="text-gray-500">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-neutral-100">
+        <p className="text-neutral-500">Loading...</p>
       </div>
     );
   }
@@ -35,8 +40,8 @@ function AuthRoute({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p className="text-gray-500">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-neutral-100">
+        <p className="text-neutral-500">Loading...</p>
       </div>
     );
   }
@@ -53,14 +58,14 @@ function RegisterRoute({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p className="text-gray-500">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-neutral-100">
+        <p className="text-neutral-500">Loading...</p>
       </div>
     );
   }
 
   // Check for token in localStorage as backup - user state might not be set yet
-  const hasToken = !!localStorage.getItem('authToken');
+  const hasToken = !!localStorage.getItem("authToken");
 
   if (user || hasToken) {
     return <Navigate to="/" replace />;

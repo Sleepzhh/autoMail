@@ -90,15 +90,13 @@ export default function MailAccountsPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Mail Accounts</h1>
-        {!showForm && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-          >
-            Add Account
-          </button>
-        )}
+        <h1 className="text-2xl font-bold text-neutral-900">Mail Accounts</h1>
+        <button
+          onClick={() => setShowForm(true)}
+          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+        >
+          Add Account
+        </button>
       </div>
 
       {message && (
@@ -113,17 +111,16 @@ export default function MailAccountsPage() {
         </div>
       )}
 
-      {showForm && (
-        <MailAccountForm
-          account={editingAccount}
-          onSubmit={editingAccount ? handleUpdate : handleCreate}
-          onCancel={handleCancelForm}
-        />
-      )}
+      <MailAccountForm
+        open={showForm}
+        account={editingAccount}
+        onSubmit={editingAccount ? handleUpdate : handleCreate}
+        onCancel={handleCancelForm}
+      />
 
       {loading ? (
         <div className="text-center py-12">
-          <p className="text-gray-500">Loading accounts...</p>
+          <p className="text-neutral-500">Loading accounts...</p>
         </div>
       ) : (
         <MailAccountList

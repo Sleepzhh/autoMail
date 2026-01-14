@@ -4,7 +4,9 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 export default function OAuthCallbackPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [status, setStatus] = useState<"loading" | "success" | "error">(
+    "loading"
+  );
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -44,13 +46,15 @@ export default function OAuthCallbackPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-neutral-50">
       <div className="max-w-md w-full bg-white shadow rounded-lg p-8 text-center">
         {status === "loading" && (
           <>
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <h2 className="text-lg font-medium text-gray-900">Processing...</h2>
-            <p className="text-sm text-gray-500 mt-2">
+            <h2 className="text-lg font-medium text-neutral-900">
+              Processing...
+            </h2>
+            <p className="text-sm text-neutral-500 mt-2">
               Please wait while we complete the authentication.
             </p>
           </>
@@ -73,9 +77,9 @@ export default function OAuthCallbackPage() {
                 />
               </svg>
             </div>
-            <h2 className="text-lg font-medium text-gray-900">Success!</h2>
-            <p className="text-sm text-gray-500 mt-2">{message}</p>
-            <p className="text-xs text-gray-400 mt-4">
+            <h2 className="text-lg font-medium text-neutral-900">Success!</h2>
+            <p className="text-sm text-neutral-500 mt-2">{message}</p>
+            <p className="text-xs text-neutral-400 mt-4">
               Redirecting to Mail Accounts...
             </p>
           </>
@@ -98,10 +102,10 @@ export default function OAuthCallbackPage() {
                 />
               </svg>
             </div>
-            <h2 className="text-lg font-medium text-gray-900">
+            <h2 className="text-lg font-medium text-neutral-900">
               Authentication Failed
             </h2>
-            <p className="text-sm text-gray-500 mt-2">{message}</p>
+            <p className="text-sm text-neutral-500 mt-2">{message}</p>
             <button
               onClick={() => navigate("/")}
               className="mt-6 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
