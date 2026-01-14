@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 export default function OAuthCallbackPage() {
   const [searchParams] = useSearchParams();
@@ -18,9 +19,11 @@ export default function OAuthCallbackPage() {
 
     if (success === "true") {
       setStatus("success");
-      setMessage(`Successfully connected your ${provider} account!`);
+      const successMsg = `Successfully connected your ${provider} account!`;
+      setMessage(successMsg);
       // Redirect to mail accounts page after 2 seconds
       setTimeout(() => {
+        toast.success(successMsg);
         navigate("/", { state: { newAccountId: accountId } });
       }, 2000);
     } else if (error) {

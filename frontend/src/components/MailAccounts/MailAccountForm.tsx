@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import type { MailAccount } from "../../api/mailAccounts";
 import { startOAuthFlow } from "../../api/oauth";
 import { Button, Input, Label, Alert, Dialog } from "../ui";
+import { Mail } from "lucide-react";
 
 interface MailAccountFormProps {
   open: boolean;
@@ -126,49 +127,35 @@ export default function MailAccountForm({
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <Label>Account Type</Label>
-          <div className="mt-2 grid grid-cols-2 gap-3">
-            <button
+          <div className="mt-2 grid grid-cols-2 gap-3 h-12">
+            <Button
               type="button"
+              variant="secondary"
               onClick={() => setFormData({ ...formData, type: "imap" })}
-              className={`flex items-center justify-center px-4 py-3 border rounded-lg ${
+              className={
                 formData.type === "imap"
-                  ? "border-blue-500 bg-blue-50 text-blue-700"
-                  : "border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50"
-              }`}
+                  ? "bg-blue-50! text-blue-700! border-blue-300!"
+                  : ""
+              }
             >
-              <svg
-                className="h-5 w-5 mr-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
-              </svg>
+              <Mail className="size-4" />
               IMAP
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="secondary"
               onClick={() => setFormData({ ...formData, type: "microsoft" })}
-              className={`flex items-center justify-center px-4 py-3 border rounded-lg ${
+              className={
                 formData.type === "microsoft"
-                  ? "border-purple-500 bg-purple-50 text-purple-700"
-                  : "border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50"
-              }`}
+                  ? "bg-purple-50! text-purple-700! border-purple-300!"
+                  : ""
+              }
             >
-              <svg
-                className="h-5 w-5 mr-2"
-                viewBox="0 0 23 23"
-                fill="currentColor"
-              >
-                <path d="M0 0h11v11H0zM12 0h11v11H12zM0 12h11v11H0zM12 12h11v11H12z" />
+              <svg className="h-4 w-4" viewBox="0 0 23 23" fill="currentColor">
+                <path d="M0 0h11v11H0zM12 0h11v11H12zM0 12h11v11H12z" />
               </svg>
               Microsoft
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -247,7 +234,7 @@ export default function MailAccountForm({
                   setFormData({ ...formData, password: e.target.value })
                 }
                 className="mt-1"
-                placeholder={account ? "(unchanged)" : ""}
+                placeholder={account ? "(unchanged)" : "••••••••••••"}
                 required={!account}
               />
             </div>

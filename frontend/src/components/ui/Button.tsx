@@ -1,7 +1,7 @@
 import { forwardRef, type ButtonHTMLAttributes } from "react";
 
 type ButtonVariant = "primary" | "secondary" | "danger" | "success" | "ghost";
-type ButtonSize = "sm" | "md" | "lg";
+type ButtonSize = "sm" | "md" | "lg" | "icon";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -10,22 +10,19 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary:
-    "text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 border-transparent",
-  secondary:
-    "text-neutral-700 bg-white hover:bg-neutral-50 focus:ring-blue-500 border-neutral-300",
-  danger:
-    "text-white bg-red-600 hover:bg-red-700 focus:ring-red-500 border-transparent",
-  success:
-    "text-white bg-green-600 hover:bg-green-700 focus:ring-green-500 border-transparent",
+  primary: "text-white bg-neutral-800 hover:bg-neutral-700 border-transparent",
+  secondary: "text-neutral-700 bg-white hover:bg-neutral-50 border-neutral-300",
+  danger: "text-white bg-red-600 hover:bg-red-700 border-transparent",
+  success: "text-white bg-green-600 hover:bg-green-700 border-transparent",
   ghost:
-    "text-neutral-700 bg-transparent hover:bg-neutral-100 focus:ring-neutral-500 border-transparent",
+    "text-neutral-700 bg-transparent hover:bg-neutral-100 border-transparent",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
   sm: "px-3 py-1.5 text-xs",
   md: "px-4 py-2 text-sm",
   lg: "px-6 py-3 text-base",
+  icon: "h-8 w-8",
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -46,10 +43,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={disabled || loading}
         className={`
-          inline-flex items-center justify-center font-medium rounded-md border
-          focus:outline-none focus:ring-2 focus:ring-offset-2
+          inline-flex items-center justify-center font-medium rounded-md border gap-1
           disabled:opacity-50 disabled:cursor-not-allowed
-          transition-colors duration-200
           ${variantStyles[variant]}
           ${sizeStyles[size]}
           ${className}

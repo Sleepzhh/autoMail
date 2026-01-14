@@ -10,14 +10,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       <input
         ref={ref}
         className={`
-          block w-full px-3 py-2 rounded-md border shadow-sm
+          block w-full px-3 py-2 rounded-md border
           text-sm text-neutral-900 placeholder-neutral-400
-          focus:outline-none focus:ring-2 focus:ring-offset-0
           disabled:bg-neutral-50 disabled:text-neutral-500 disabled:cursor-not-allowed
           ${
             error
-              ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-              : "border-neutral-300 focus:border-blue-500 focus:ring-blue-500"
+              ? "border-red-300 focus:border-red-500"
+              : "border-neutral-300 focus:border-blue-500"
           }
           ${className}
         `}

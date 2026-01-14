@@ -14,7 +14,6 @@ interface AutomationFlowListProps {
   onEdit: (flow: AutomationFlow) => void;
   onDelete: (id: number) => void;
   onRun: (id: number) => void;
-  onToggle: (id: number, enabled: boolean) => void;
 }
 
 export default function AutomationFlowList({
@@ -22,7 +21,6 @@ export default function AutomationFlowList({
   onEdit,
   onDelete,
   onRun,
-  onToggle,
 }: AutomationFlowListProps) {
   if (flows.length === 0) {
     return (
@@ -59,26 +57,15 @@ export default function AutomationFlowList({
               {flow.name}
             </TableCell>
             <TableCell>
-              <div className="flex items-center space-x-2">
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={flow.enabled}
-                    onChange={(e) => onToggle(flow.id, e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
-                <span
-                  className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                    flow.enabled
-                      ? "bg-green-100 text-green-800"
-                      : "bg-neutral-100 text-neutral-800"
-                  }`}
-                >
-                  {flow.enabled ? "On" : "Off"}
-                </span>
-              </div>
+              <span
+                className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                  flow.enabled
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"
+                }`}
+              >
+                {flow.enabled ? "On" : "Off"}
+              </span>
             </TableCell>
             <TableCell className="text-neutral-600">
               {flow.sourceMailAccount?.name} / {flow.sourceMailbox}
@@ -96,12 +83,12 @@ export default function AutomationFlowList({
               <Dropdown
                 items={[
                   {
-                    label: "Run",
-                    onClick: () => onRun(flow.id),
-                  },
-                  {
                     label: "Edit",
                     onClick: () => onEdit(flow),
+                  },
+                  {
+                    label: "Run",
+                    onClick: () => onRun(flow.id),
                   },
                   {
                     label: "Delete",

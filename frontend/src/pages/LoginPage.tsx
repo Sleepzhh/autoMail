@@ -1,26 +1,25 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
-import { Button, Input, Label, Alert } from "../components/ui";
+import { Button, Input, Label } from "../components/ui";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     try {
       await login(username, password);
       navigate("/");
     } catch (err: any) {
-      setError(err.message || "Login failed");
+      toast.error(err.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -35,8 +34,6 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {error && <Alert variant="error">{error}</Alert>}
-
           <div>
             <Label htmlFor="username">Username</Label>
             <Input

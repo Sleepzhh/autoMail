@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import {
   getMailAccounts,
   createMailAccount,
@@ -8,6 +9,9 @@ import {
 } from "../api/mailAccounts";
 import MailAccountList from "../components/MailAccounts/MailAccountList";
 import MailAccountForm from "../components/MailAccounts/MailAccountForm";
+import { PageHeader } from "../components/ui/PageHeader";
+import { Button } from "../components/ui/Button";
+import { Plus } from "lucide-react";
 
 export default function MailAccountsPage() {
   const [accounts, setAccounts] = useState<MailAccount[]>([]);
@@ -16,10 +20,6 @@ export default function MailAccountsPage() {
   const [editingAccount, setEditingAccount] = useState<MailAccount | null>(
     null
   );
-  const [message, setMessage] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
 
   useEffect(() => {
     loadAccounts();
@@ -31,25 +31,20 @@ export default function MailAccountsPage() {
       const data = await getMailAccounts();
       setAccounts(data);
     } catch (error) {
-      showMessage("error", `Failed to load accounts: ${error}`);
+      toast.error(`Failed to load accounts: ${error}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const showMessage = (type: "success" | "error", text: string) => {
-    setMessage({ type, text });
-    setTimeout(() => setMessage(null), 5000);
-  };
-
   const handleCreate = async (data: Partial<MailAccount>) => {
     try {
       await createMailAccount(data);
-      showMessage("success", "Account created successfully");
+      toast.success("Account created successfully");
       setShowForm(false);
       loadAccounts();
     } catch (error) {
-      showMessage("error", `Failed to create account: ${error}`);
+      toast.error(`Failed to create account: ${error}`);
     }
   };
 
@@ -58,22 +53,22 @@ export default function MailAccountsPage() {
 
     try {
       await updateMailAccount(editingAccount.id, data);
-      showMessage("success", "Account updated successfully");
+      toast.success("Account updated successfully");
       setEditingAccount(null);
       setShowForm(false);
       loadAccounts();
     } catch (error) {
-      showMessage("error", `Failed to update account: ${error}`);
+      toast.error(`Failed to update account: ${error}`);
     }
   };
 
   const handleDelete = async (id: number) => {
     try {
       await deleteMailAccount(id);
-      showMessage("success", "Account deleted successfully");
+      toast.success("Account deleted successfully");
       loadAccounts();
     } catch (error) {
-      showMessage("error", `Failed to delete account: ${error}`);
+      toast.error(`Failed to delete account: ${error}`);
     }
   };
 
@@ -89,27 +84,15 @@ export default function MailAccountsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-neutral-900">Mail Accounts</h1>
-        <button
-          onClick={() => setShowForm(true)}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-        >
-          Add Account
-        </button>
-      </div>
-
-      {message && (
-        <div
-          className={`rounded-md p-4 ${
-            message.type === "success"
-              ? "bg-green-50 text-green-800"
-              : "bg-red-50 text-red-800"
-          }`}
-        >
-          <p className="text-sm">{message.text}</p>
-        </div>
-      )}
+      <PageHeader
+        title="Mail Accounts"
+        description="Manage your IMAP and Microsoft OAuth mail accounts for automation flows."
+        action={
+          <Button variant="ghost" size="icon" onClick={() => setShowForm(true)}>
+            <Plus className="size-4" />
+          </Button>
+        }
+      />
 
       <MailAccountForm
         open={showForm}

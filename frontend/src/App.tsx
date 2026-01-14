@@ -4,6 +4,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import { Toaster } from "sonner";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Layout from "./components/Layout/Layout";
 import MailAccountsPage from "./pages/MailAccountsPage";
@@ -142,6 +143,7 @@ function App() {
     <Router>
       <AuthProvider>
         <AppRoutes />
+        <Toaster position="bottom-center" richColors />
       </AuthProvider>
     </Router>
   );

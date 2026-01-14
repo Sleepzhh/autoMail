@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import type { AutomationFlow } from "../../api/automationFlows";
 import {
   type MailAccount,
@@ -81,8 +82,7 @@ export default function AutomationFlowForm({
         setTargetMailboxes(mailboxes);
       }
     } catch (error) {
-      console.error("Error loading mailboxes:", error);
-      alert(`Failed to load mailboxes: ${error}`);
+      toast.error(`Failed to load mailboxes: ${error}`);
     } finally {
       if (type === "source") {
         setLoadingSourceMailboxes(false);

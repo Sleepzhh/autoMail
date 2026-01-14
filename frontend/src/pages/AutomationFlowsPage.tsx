@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import {
   getAutomationFlows,
   createAutomationFlow,
@@ -10,6 +11,9 @@ import {
 import { getMailAccounts, type MailAccount } from "../api/mailAccounts";
 import AutomationFlowList from "../components/AutomationFlows/AutomationFlowList";
 import AutomationFlowForm from "../components/AutomationFlows/AutomationFlowForm";
+import { PageHeader } from "../components/ui/PageHeader";
+import { Button } from "../components/ui/Button";
+import { Plus } from "lucide-react";
 
 export default function AutomationFlowsPage() {
   const [flows, setFlows] = useState<AutomationFlow[]>([]);
@@ -17,10 +21,6 @@ export default function AutomationFlowsPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingFlow, setEditingFlow] = useState<AutomationFlow | null>(null);
-  const [message, setMessage] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
 
   useEffect(() => {
     loadData();
@@ -36,25 +36,20 @@ export default function AutomationFlowsPage() {
       setFlows(flowsData);
       setAccounts(accountsData);
     } catch (error) {
-      showMessage("error", `Failed to load data: ${error}`);
+      toast.error(`Failed to load data: ${error}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const showMessage = (type: "success" | "error", text: string) => {
-    setMessage({ type, text });
-    setTimeout(() => setMessage(null), 5000);
-  };
-
   const handleCreate = async (data: Partial<AutomationFlow>) => {
     try {
       await createAutomationFlow(data);
-      showMessage("success", "Automation flow created successfully");
+      toast.success("Automation flow created successfully");
       setShowForm(false);
       loadData();
     } catch (error) {
-      showMessage("error", `Failed to create flow: ${error}`);
+      toast.error(`Failed to create flow: ${error}`);
     }
   };
 
@@ -63,45 +58,32 @@ export default function AutomationFlowsPage() {
 
     try {
       await updateAutomationFlow(editingFlow.id, data);
-      showMessage("success", "Automation flow updated successfully");
+      toast.success("Automation flow updated successfully");
       setEditingFlow(null);
       setShowForm(false);
       loadData();
     } catch (error) {
-      showMessage("error", `Failed to update flow: ${error}`);
+      toast.error(`Failed to update flow: ${error}`);
     }
   };
 
   const handleDelete = async (id: number) => {
     try {
       await deleteAutomationFlow(id);
-      showMessage("success", "Automation flow deleted successfully");
+      toast.success("Automation flow deleted successfully");
       loadData();
     } catch (error) {
-      showMessage("error", `Failed to delete flow: ${error}`);
+      toast.error(`Failed to delete flow: ${error}`);
     }
   };
 
   const handleRun = async (id: number) => {
     try {
       await runAutomationFlow(id);
-      showMessage("success", "Automation flow started successfully");
+      toast.success("Automation flow started successfully");
       loadData();
     } catch (error) {
-      showMessage("error", `Failed to run flow: ${error}`);
-    }
-  };
-
-  const handleToggle = async (id: number, enabled: boolean) => {
-    try {
-      await updateAutomationFlow(id, { enabled });
-      showMessage(
-        "success",
-        `Automation flow ${enabled ? "enabled" : "disabled"}`
-      );
-      loadData();
-    } catch (error) {
-      showMessage("error", `Failed to update flow: ${error}`);
+      toast.error(`Failed to run flow: ${error}`);
     }
   };
 
@@ -117,18 +99,20 @@ export default function AutomationFlowsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-neutral-900">
-          Automation Flows
-        </h1>
-        <button
-          onClick={() => setShowForm(true)}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-          disabled={accounts.length === 0}
-        >
-          Add Flow
-        </button>
-      </div>
+      <PageHeader
+        title="Automation Flows"
+        description="Create and manage automated email flows between your mail accounts."
+        action={
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowForm(true)}
+            disabled={accounts.length === 0}
+          >
+            <Plus className="size-4" />
+          </Button>
+        }
+      />
 
       {accounts.length === 0 && (
         <div className="rounded-md bg-yellow-50 p-4">
@@ -136,18 +120,6 @@ export default function AutomationFlowsPage() {
             You need to create at least one mail account before you can create
             automation flows.
           </p>
-        </div>
-      )}
-
-      {message && (
-        <div
-          className={`rounded-md p-4 ${
-            message.type === "success"
-              ? "bg-green-50 text-green-800"
-              : "bg-red-50 text-red-800"
-          }`}
-        >
-          <p className="text-sm">{message.text}</p>
         </div>
       )}
 
@@ -169,7 +141,6 @@ export default function AutomationFlowsPage() {
           onEdit={handleEdit}
           onDelete={handleDelete}
           onRun={handleRun}
-          onToggle={handleToggle}
         />
       )}
     </div>

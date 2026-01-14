@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { getMailAccounts, type MailAccount } from "../api/mailAccounts";
 import {
   getMigrationPreview,
@@ -9,6 +10,7 @@ import {
 } from "../api/migration";
 import MigrationForm from "../components/Migration/MigrationForm";
 import { Alert } from "../components/ui";
+import { PageHeader } from "../components/ui/PageHeader";
 
 export default function MigrationPage() {
   const [accounts, setAccounts] = useState<MailAccount[]>([]);
@@ -19,10 +21,6 @@ export default function MigrationPage() {
   const [preview, setPreview] = useState<MigrationPreview | null>(null);
   const [result, setResult] = useState<MigrationResult | null>(null);
   const [isExecuting, setIsExecuting] = useState(false);
-  const [message, setMessage] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
 
   useEffect(() => {
     loadData();
@@ -38,15 +36,10 @@ export default function MigrationPage() {
       setAccounts(accountsData);
       setDefaultExcludedFolders(defaultFolders.excludedFolders);
     } catch (error) {
-      showMessage("error", `Failed to load data: ${error}`);
+      toast.error(`Failed to load data: ${error}`);
     } finally {
       setLoading(false);
     }
-  };
-
-  const showMessage = (type: "success" | "error", text: string) => {
-    setMessage({ type, text });
-    setTimeout(() => setMessage(null), 5000);
   };
 
   const handlePreview = async (
@@ -62,7 +55,7 @@ export default function MigrationPage() {
       });
       setPreview(previewData);
     } catch (error) {
-      showMessage("error", `Failed to get preview: ${error}`);
+      toast.error(`Failed to get preview: ${error}`);
     }
   };
 
@@ -81,18 +74,16 @@ export default function MigrationPage() {
       });
       setResult(migrationResult);
       if (migrationResult.success) {
-        showMessage(
-          "success",
+        toast.success(
           `Migration completed: ${migrationResult.totalMessagesCopied} messages copied`
         );
       } else {
-        showMessage(
-          "error",
+        toast.error(
           `Migration completed with errors: ${migrationResult.errors.length} errors`
         );
       }
     } catch (error) {
-      showMessage("error", `Migration failed: ${error}`);
+      toast.error(`Migration failed: ${error}`);
     } finally {
       setIsExecuting(false);
     }
@@ -105,14 +96,10 @@ export default function MigrationPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-900">Migration</h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Copy folders and messages from one account to another
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Migration"
+        description="Copy folders and messages from one account to another."
+      />
 
       {accounts.length < 2 && (
         <Alert variant="warning">
@@ -120,7 +107,6 @@ export default function MigrationPage() {
         </Alert>
       )}
 
-      {message && <Alert variant={message.type}>{message.text}</Alert>}
 
       {loading ? (
         <div className="text-center py-12">
