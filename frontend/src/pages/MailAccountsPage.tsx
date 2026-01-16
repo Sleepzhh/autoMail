@@ -83,7 +83,7 @@ export default function MailAccountsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <PageHeader
         title="Mail Accounts"
         description="Manage your IMAP and Microsoft OAuth mail accounts for automation flows."

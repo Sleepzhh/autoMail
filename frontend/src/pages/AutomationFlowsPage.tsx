@@ -13,6 +13,7 @@ import AutomationFlowList from "../components/AutomationFlows/AutomationFlowList
 import AutomationFlowForm from "../components/AutomationFlows/AutomationFlowForm";
 import { PageHeader } from "../components/ui/PageHeader";
 import { Button } from "../components/ui/Button";
+import { Alert } from "../components/ui/Alert";
 import { Plus } from "lucide-react";
 
 export default function AutomationFlowsPage() {
@@ -98,7 +99,7 @@ export default function AutomationFlowsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <PageHeader
         title="Automation Flows"
         description="Create and manage automated email flows between your mail accounts."
@@ -115,12 +116,10 @@ export default function AutomationFlowsPage() {
       />
 
       {accounts.length === 0 && (
-        <div className="rounded-md bg-yellow-50 p-4">
-          <p className="text-sm text-yellow-800">
-            You need to create at least one mail account before you can create
-            automation flows.
-          </p>
-        </div>
+        <Alert variant="warning">
+          You need to create at least one mail account before you can create
+          automation flows.
+        </Alert>
       )}
 
       <AutomationFlowForm

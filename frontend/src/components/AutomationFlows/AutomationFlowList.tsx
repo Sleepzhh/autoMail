@@ -24,7 +24,7 @@ export default function AutomationFlowList({
 }: AutomationFlowListProps) {
   if (flows.length === 0) {
     return (
-      <div className="text-center py-12 bg-white shadow rounded-lg">
+      <div className="text-center py-5">
         <p className="text-neutral-500">
           No automation flows yet. Create one to get started.
         </p>

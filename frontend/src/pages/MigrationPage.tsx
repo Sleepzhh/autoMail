@@ -95,7 +95,7 @@ export default function MigrationPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <PageHeader
         title="Migration"
         description="Copy folders and messages from one account to another."
@@ -106,7 +106,6 @@ export default function MigrationPage() {
           You need at least two mail accounts to perform a migration.
         </Alert>
       )}
-
 
       {loading ? (
         <div className="text-center py-12">
@@ -125,7 +124,7 @@ export default function MigrationPage() {
           />
 
           {preview && !result && (
-            <div className="bg-white border border-neutral-200 rounded-lg shadow-sm">
+            <div className="bg-white border border-neutral-200">
               <div className="px-6 py-4 border-b border-neutral-200">
                 <h2 className="text-lg font-semibold text-neutral-900">
                   Migration Preview
@@ -191,9 +190,7 @@ export default function MigrationPage() {
           {result && (
             <div
               className={`border rounded-lg shadow-sm overflow-hidden ${
-                result.success
-                  ? "border-green-200"
-                  : "border-red-200"
+                result.success ? "border-green-200" : "border-red-200"
               }`}
             >
               <div

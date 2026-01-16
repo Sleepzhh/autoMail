@@ -22,7 +22,7 @@ export default function MailAccountList({
 }: MailAccountListProps) {
   if (accounts.length === 0) {
     return (
-      <div className="text-center">
+      <div className="text-center py-5">
         <p className="text-neutral-500">
           No mail accounts yet. Create one to get started.
         </p>
