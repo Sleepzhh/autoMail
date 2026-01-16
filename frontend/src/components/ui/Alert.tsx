@@ -18,10 +18,10 @@ const variantStyles: Record<AlertVariant, string> = {
 function Alert({ variant = "info", children, className = "" }: AlertProps) {
   return (
     <div
-      className={`rounded-2xl border p-4 ${variantStyles[variant]} ${className}`}
+      className={`rounded-2xl border p-4 text-sm ${variantStyles[variant]} ${className}`}
       role="alert"
     >
-      <p className="text-sm">{children}</p>
+      {children}
     </div>
   );
 }

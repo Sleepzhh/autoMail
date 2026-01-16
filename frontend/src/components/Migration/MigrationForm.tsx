@@ -1,7 +1,15 @@
 import { useState, useEffect } from "react";
 import type { MailAccount, Mailbox } from "../../api/mailAccounts";
 import { getMailboxes } from "../../api/mailAccounts";
-import { Button, Select, Label } from "../ui";
+import {
+  Button,
+  Select,
+  Label,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "../ui";
 
 interface MigrationFormProps {
   accounts: MailAccount[];
@@ -30,7 +38,9 @@ export default function MigrationForm({
   const [targetAccountId, setTargetAccountId] = useState<number | "">("");
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [mailboxes, setMailboxes] = useState<Mailbox[]>([]);
-  const [selectedMailboxes, setSelectedMailboxes] = useState<Set<string>>(new Set());
+  const [selectedMailboxes, setSelectedMailboxes] = useState<Set<string>>(
+    new Set()
+  );
   const [isLoadingMailboxes, setIsLoadingMailboxes] = useState(false);
   const [mailboxError, setMailboxError] = useState<string | null>(null);
 
@@ -131,12 +141,11 @@ export default function MigrationForm({
     hasPreview;
 
   return (
-    <div className="rounded-2xl border border-neutral-200 p-6">
-      <h2 className="text-lg font-semibold text-neutral-900 mb-4">
-        Migration Settings
-      </h2>
-
-      <div className="space-y-4">
+    <Card>
+      <CardHeader className="border-b border-neutral-200">
+        <CardTitle>Migration Settings</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="sourceAccount">Source Account</Label>
@@ -257,7 +266,10 @@ export default function MigrationForm({
                   .sort((a, b) => a.path.localeCompare(b.path))
                   .map((mailbox) => {
                     const depth = (mailbox.path.match(/\//g) || []).length;
-                    const displayName = mailbox.name || mailbox.path.split("/").pop() || mailbox.path;
+                    const displayName =
+                      mailbox.name ||
+                      mailbox.path.split("/").pop() ||
+                      mailbox.path;
 
                     return (
                       <label
@@ -316,7 +328,7 @@ export default function MigrationForm({
             {isExecuting ? "Executing Migration..." : "Execute Migration"}
           </Button>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

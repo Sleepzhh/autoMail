@@ -9,7 +9,14 @@ import {
   type MigrationResult,
 } from "../api/migration";
 import MigrationForm from "../components/Migration/MigrationForm";
-import { Alert } from "../components/ui";
+import {
+  Alert,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "../components/ui";
 import { PageHeader } from "../components/ui/PageHeader";
 
 export default function MigrationPage() {
@@ -124,16 +131,14 @@ export default function MigrationPage() {
           />
 
           {preview && !result && (
-            <div className="bg-white border border-neutral-200">
-              <div className="px-6 py-4 border-b border-neutral-200">
-                <h2 className="text-lg font-semibold text-neutral-900">
-                  Migration Preview
-                </h2>
-                <p className="mt-1 text-sm text-neutral-500">
+            <Card>
+              <CardHeader className="border-b border-neutral-200">
+                <CardTitle>Migration Preview</CardTitle>
+                <CardDescription>
                   The following folders and messages will be copied
-                </p>
-              </div>
-              <div className="px-6 py-4 space-y-4">
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium text-neutral-700">
                     Total Messages:
@@ -159,7 +164,7 @@ export default function MigrationPage() {
                       No folders to copy
                     </p>
                   ) : (
-                    <ul className="divide-y divide-neutral-200 border border-neutral-200 rounded-md">
+                    <ul className="divide-y divide-neutral-200 border border-neutral-200 rounded-lg">
                       {preview.folders.map((folder) => (
                         <li
                           key={folder.path}
@@ -183,100 +188,48 @@ export default function MigrationPage() {
                     </ul>
                   )}
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           )}
 
           {result && (
-            <div
-              className={`border rounded-lg shadow-sm overflow-hidden ${
-                result.success ? "border-green-200" : "border-red-200"
-              }`}
-            >
-              <div
-                className={`px-6 py-4 ${
-                  result.success
-                    ? "bg-green-50 border-b border-green-200"
-                    : "bg-red-50 border-b border-red-200"
-                }`}
-              >
-                <h2
-                  className={`text-lg font-semibold ${
-                    result.success ? "text-green-800" : "text-red-800"
-                  }`}
-                >
+            <Alert variant={result.success ? "success" : "error"}>
+              <div className="space-y-3">
+                <div className="font-medium">
                   {result.success
                     ? "Migration Completed Successfully"
                     : "Migration Completed with Errors"}
-                </h2>
-              </div>
-              <div className="px-6 py-4 space-y-4 bg-white">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-neutral-700">
-                    Total Messages Copied:
-                  </span>
-                  <span className="text-sm text-neutral-900">
-                    {result.totalMessagesCopied}
-                  </span>
                 </div>
-
+                <div>
+                  Total Messages Copied: {result.totalMessagesCopied}
+                </div>
                 {result.foldersCreated.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-medium text-neutral-700 mb-2">
-                      Folders Created:
-                    </h3>
-                    <ul className="list-disc list-inside text-sm text-neutral-600">
-                      {result.foldersCreated.map((folder) => (
-                        <li key={folder}>{folder}</li>
-                      ))}
-                    </ul>
+                    Folders Created: {result.foldersCreated.join(", ")}
                   </div>
                 )}
-
                 {result.foldersCopied.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-medium text-neutral-700 mb-2">
-                      Folders Copied:
-                    </h3>
-                    <ul className="divide-y divide-neutral-200 border border-neutral-200 rounded-md">
-                      {result.foldersCopied.map((folder) => (
-                        <li
-                          key={folder.path}
-                          className="px-4 py-2 flex justify-between items-center"
-                        >
-                          <span className="text-sm text-neutral-900">
-                            {folder.path}
-                          </span>
-                          <span className="text-sm text-neutral-500">
-                            {folder.messageCount} messages
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
+                    Folders Copied:{" "}
+                    {result.foldersCopied
+                      .map((f) => `${f.path} (${f.messageCount})`)
+                      .join(", ")}
                   </div>
                 )}
-
                 {result.errors.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-medium text-red-700 mb-2">
-                      Errors:
-                    </h3>
-                    <ul className="divide-y divide-red-200 border border-red-200 rounded-md bg-red-50">
+                    <div className="font-medium mb-1">Errors:</div>
+                    <ul className="list-disc list-inside">
                       {result.errors.map((error, index) => (
-                        <li key={index} className="px-4 py-2">
-                          <span className="text-sm font-medium text-red-800">
-                            {error.folder}:
-                          </span>{" "}
-                          <span className="text-sm text-red-700">
-                            {error.error}
-                          </span>
+                        <li key={index}>
+                          {error.folder}: {error.error}
                         </li>
                       ))}
                     </ul>
                   </div>
                 )}
               </div>
-            </div>
+            </Alert>
           )}
         </>
       )}
