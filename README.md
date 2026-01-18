@@ -1,19 +1,38 @@
-# autoMail
+<p align="center">
+  <img src="other/icon.svg" alt="autoMail Logo" width="80" height="80">
+</p>
 
-Email automation tool for moving emails between accounts automatically.
+<h1 align="center">autoMail</h1>
+
+<p align="center">
+  <strong>Automate your Mailbox</strong><br>
+  Email automation tool for moving emails between accounts
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/TypeScript-5.0+-3178C6?style=flat&logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react&logoColor=black" alt="React">
+  <img src="https://img.shields.io/badge/Express-5-000000?style=flat&logo=express" alt="Express">
+  <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
+</p>
+
+---
+
+autoMail connects your IMAP and Microsoft mail accounts, letting you create automation flows that move emails between mailboxes on a schedule. Self-hosted, simple web UI, your data stays on your machine.
 
 ## Features
 
-- Connect IMAP and Microsoft OAuth mail accounts
-- Create automation flows to move emails between mailboxes
-- Schedule automations with interval-based triggers
-- Simple web UI for configuration
+- **Multi-account support** — IMAP (password-based) and Microsoft OAuth
+- **Automation flows** — Source mailbox to target mailbox routing
+- **Scheduled triggers** — Interval-based execution
+- **Self-hosted** — Your data stays on your machine
+- **Simple UI** — Clean web interface for configuration
 
-## Deployment
+## Quick Start
 
-### Using Docker Compose (Recommended)
+### Docker Compose (recommended)
 
-1. Create a `docker-compose.yml` file:
+Create a `docker-compose.yml`:
 
 ```yaml
 services:
@@ -54,40 +73,37 @@ networks:
     driver: bridge
 ```
 
-2. Create a `.env` file with your secrets:
+Create a `.env` file:
 
 ```bash
-# Microsoft OAuth (get from Azure Portal)
 MICROSOFT_CLIENT_ID=your-client-id
 MICROSOFT_CLIENT_SECRET=your-client-secret
-
-# Security keys (generate with: openssl rand -hex 32)
-JWT_SECRET=your-jwt-secret
-ENCRYPTION_KEY=your-encryption-key
+JWT_SECRET=$(openssl rand -hex 32)
+ENCRYPTION_KEY=$(openssl rand -hex 32)
 ```
 
-3. Start the application:
+Start the application:
 
 ```bash
 docker compose up -d
 ```
 
-4. Access the web UI at `http://localhost`
+Visit `http://localhost`
 
-### Environment Variables
+## Configuration
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `MICROSOFT_CLIENT_ID` | Azure OAuth client ID | Yes (for Microsoft accounts) |
-| `MICROSOFT_CLIENT_SECRET` | Azure OAuth client secret | Yes (for Microsoft accounts) |
-| `JWT_SECRET` | 32-byte hex key for JWT tokens | Yes |
-| `ENCRYPTION_KEY` | 32-byte hex key for token encryption | Yes |
-| `BACKEND_URL` | Public URL of backend (for OAuth callbacks) | Yes |
-| `FRONTEND_URL` | Public URL of frontend (for redirects) | Yes |
+| Variable | Description |
+|----------|-------------|
+| `MICROSOFT_CLIENT_ID` | Azure OAuth client ID |
+| `MICROSOFT_CLIENT_SECRET` | Azure OAuth client secret |
+| `JWT_SECRET` | 32-byte hex key for JWT tokens |
+| `ENCRYPTION_KEY` | 32-byte hex key for token encryption |
+| `BACKEND_URL` | Public URL of backend (for OAuth callbacks) |
+| `FRONTEND_URL` | Public URL of frontend (for redirects) |
 
-### Production Deployment
+### Production
 
-For production, update the URLs to your domain:
+Update URLs to your domain:
 
 ```yaml
 environment:
@@ -104,18 +120,17 @@ environment:
 5. Create a client secret
 6. Copy the Application (client) ID and secret to your `.env`
 
+## Tech Stack
+
+Backend: Express 5, TypeScript, SQLite
+Frontend: React 19, Vite 7, Tailwind CSS 4
+Infrastructure: Docker
+
 ## Development
 
 ```bash
-# Install dependencies
-npm install
-
-# Run both frontend and backend
-npm run dev
-
-# Or run separately
-cd backend && npm run dev
-cd frontend && npm run dev
+cd backend && npm run dev   # Start backend
+cd frontend && npm run dev  # Start frontend
 ```
 
 ## License
